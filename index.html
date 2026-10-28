@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1d2326">
+<title>Montaje Ponce</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Montaje">
+<style>
+/* Pantalla completa: barra superior oscura, visor 3D, hoja inferior con la pieza. Ámbar = selección, cian = montada. */
+:root {
+  --bg: #f3f4f2; --panel: #ffffff; --stage: #e6e9ea; --fg: #1d2326; --muted: #5d676d; --line: #d5dadc;
+  --bar: #1d2326; --bar-fg: #f3f4f2; --bar-muted: #9aa5ab;
+  --accent: #e39300; --accent-ink: #1d1400; --done: #00a9c7; --done-ink: #00262e; --err: #c0392b; --chip: #eceeee; --warn: #b26a00;
+  --f: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --f-cond: "Roboto Condensed", "Arial Narrow", system-ui, sans-serif;
+  --f-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px); --sar: env(safe-area-inset-right, 0px);
+}
+@media (prefers-color-scheme: dark) { :root {
+  --bg: #15191b; --panel: #1d2225; --stage: #23292c; --fg: #e8eced; --muted: #9aa5ab; --line: #333b3f;
+  --bar: #0f1213; --accent: #ffad2e; --done: #2cd3ef; --err: #ff7a6b; --chip: #2b3236; --warn: #ffb547; color-scheme: dark } }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f); font-size: 16px; overscroll-behavior: none; -webkit-user-select: none; user-select: none; }
+input { -webkit-user-select: text; user-select: text; }
+button { font: inherit; cursor: pointer; border-radius: 10px; color: inherit; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.screen { position: fixed; inset: 0; display: flex; flex-direction: column; }
+
+/* ---- login / configuración ---- */
+.auth { justify-content: center; align-items: center; padding: calc(24px + var(--sat)) max(20px, var(--sar)) calc(24px + var(--sab)) max(20px, var(--sal)); background: var(--bar); color: var(--bar-fg); }
+.auth form { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 14px; }
+.brand { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.brand-mark { width: 48px; height: 48px; border-radius: 12px; background: var(--done); display: grid; place-items: center; }
+.brand h1 { margin: 0; font-family: var(--f-cond); font-size: 28px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; line-height: 1; }
+.brand p { margin: 4px 0 0; color: var(--bar-muted); font-size: 14px; }
+.auth label { font-size: 13px; color: var(--bar-muted); display: flex; flex-direction: column; gap: 6px; font-weight: 600; letter-spacing: .03em; }
+.auth input { font: inherit; font-size: 17px; padding: 14px; border-radius: 10px; border: 1px solid #3a4246; background: #262c2f; color: var(--bar-fg); }
+.big { padding: 16px; font-size: 17px; font-weight: 700; border: 0; background: var(--done); color: var(--done-ink); width: 100%; }
+.big:disabled { opacity: .5; }
+.err { color: #ff8a7a; font-size: 14px; margin: 0; min-height: 1em; }
+.small { color: var(--bar-muted); font-size: 13px; margin: 0; }
+.linkish { background: none; border: 0; color: var(--bar-muted); text-decoration: underline; font-size: 13px; padding: 4px; }
+
+/* ---- app ---- */
+.top { background: var(--bar); color: var(--bar-fg); padding: calc(8px + var(--sat)) max(12px, var(--sar)) 10px max(12px, var(--sal)); display: grid; grid-template-columns: 1fr auto; gap: 8px 10px; align-items: center; }
+.model-btn { background: none; border: 0; padding: 4px 0; display: flex; align-items: center; gap: 6px; min-width: 0; text-align: left; }
+.model-btn span { font-weight: 600; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.model-btn svg { flex: none; opacity: .7; }
+.icon-btn { background: none; border: 0; width: 44px; height: 44px; display: grid; place-items: center; }
+.prog { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; }
+.prog-n { font-family: var(--f-cond); font-weight: 700; font-size: 22px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bar { flex: 1; height: 8px; background: #3a4246; border-radius: 4px; overflow: hidden; }
+#prog-bar { height: 100%; width: 0; background: var(--done); transition: width .3s; }
+.prog-p { color: var(--bar-muted); font-size: 13px; font-variant-numeric: tabular-nums; min-width: 38px; text-align: right; }
+.sync { font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 99px; background: #2b3236; color: var(--bar-muted); white-space: nowrap; }
+.sync[data-k=off] { background: #4a3a1a; color: #ffcf80; }
+.sync[data-k=pend] { background: #4a3a1a; color: #ffcf80; }
+
+.stage { position: relative; flex: 1; min-height: 0; background: var(--stage); }
+#viewport { position: absolute; inset: 0; }
+#viewport canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.fab-col { position: absolute; right: max(12px, var(--sar)); top: 12px; display: flex; flex-direction: column; gap: 10px; }
+.fab { width: 48px; height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); display: grid; place-items: center; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+.fab[aria-pressed=true] { background: var(--done); border-color: var(--done); color: var(--done-ink); }
+
+.sheet { background: var(--panel); border-top: 1px solid var(--line); padding: 14px max(16px, var(--sar)) calc(14px + var(--sab)) max(16px, var(--sal)); display: flex; flex-direction: column; gap: 10px; }
+.hint { color: var(--muted); font-size: 15px; margin: 4px 0; text-align: center; }
+.mark-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+#c-mark { font-family: var(--f-cond); font-weight: 700; font-size: 32px; line-height: 1; margin: 0; overflow-wrap: anywhere; }
+.chip { font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 99px; background: var(--chip); color: var(--muted); white-space: nowrap; }
+.chip[data-state=done] { background: var(--done); color: var(--done-ink); }
+.chip[data-state=pend] { background: #ffe3b0; color: #5a3a00; }
+.meta-line { margin: 0; color: var(--muted); font-size: 14px; }
+#c-who { margin: 0; font-size: 14px; padding: 8px 10px; background: var(--bg); border-radius: 8px; }
+#c-toggle { padding: 18px; font-size: 18px; font-weight: 700; border: 0; background: var(--done); color: var(--done-ink); }
+#c-toggle[data-state=done] { background: var(--panel); color: var(--fg); border: 1px solid var(--line); font-weight: 600; }
+
+/* ---- hojas modales ---- */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; z-index: 30; }
+.modal-card { background: var(--panel); width: 100%; max-height: 82%; overflow: auto; border-radius: 16px 16px 0 0; padding: 8px max(16px, var(--sar)) calc(16px + var(--sab)) max(16px, var(--sal)); }
+.grab { width: 40px; height: 5px; border-radius: 3px; background: var(--line); margin: 4px auto 10px; }
+.modal h2 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.row { width: 100%; display: flex; align-items: center; gap: 12px; text-align: left; background: none; border: 0; border-radius: 0; padding: 14px 4px; border-bottom: 1px solid var(--line); }
+.row .t { flex: 1; min-width: 0; }
+.row .t b { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row .t small { color: var(--muted); font-size: 13px; }
+.row[aria-current=true] b { color: var(--done); }
+.dot { width: 12px; height: 12px; border-radius: 50%; background: var(--chip); border: 1px solid var(--line); flex: none; }
+.dot[data-state=done] { background: var(--done); border-color: var(--done); }
+#q { width: 100%; font: inherit; font-size: 17px; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); margin-bottom: 6px; }
+.me { padding: 6px 4px 12px; border-bottom: 1px solid var(--line); }
+.me b { display: block; }
+.me small { color: var(--muted); }
+
+.overlay { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; background: var(--stage); }
+.overlay > div { max-width: 320px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.overlay p { margin: 0; color: var(--muted); }
+.spin { width: 32px; height: 32px; border: 3px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: sp .9s linear infinite; }
+@keyframes sp { to { transform: rotate(360deg); } }
+#toast { position: fixed; left: 16px; right: 76px; top: calc(var(--sat) + 112px); margin: auto; width: fit-content; max-width: calc(100% - 92px); background: var(--fg); color: var(--bg); padding: 12px 16px; border-radius: 10px; font-weight: 600; z-index: 50; text-align: center; }
+#install { position: fixed; left: max(12px, var(--sal)); right: max(12px, var(--sar)); bottom: calc(12px + var(--sab)); z-index: 40; background: var(--bar); color: var(--bar-fg); border-radius: 14px; padding: 14px; display: flex; gap: 12px; align-items: center; box-shadow: 0 6px 24px rgba(0,0,0,.3); }
+#install img { width: 44px; height: 44px; border-radius: 10px; flex: none; }
+#install .t { flex: 1; min-width: 0; font-size: 14px; line-height: 1.35; }
+#install .t b { display: block; font-size: 15px; }
+#install button { border: 0; padding: 10px 12px; font-weight: 700; }
+#ins-go { background: var(--done); color: var(--done-ink); }
+#ins-x { background: none; color: var(--bar-muted); }
+#toast[data-kind=err] { background: var(--err); color: #fff; }
+@media (prefers-reduced-motion: reduce) { .spin { animation-duration: 3s; } #prog-bar { transition: none; } }
+@media (min-width: 900px) {
+  #screen-app { display: grid; grid-template-columns: 1fr 360px; grid-template-rows: auto 1fr; }
+  .top { grid-column: 1 / -1; }
+  .sheet { border-top: 0; border-left: 1px solid var(--line); justify-content: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<!-- Configuración inicial (solo si la app no lleva la conexión incluida) -->
+<section class="screen auth" id="screen-setup" hidden>
+  <form id="setup-form">
+    <div class="brand"><div class="brand-mark"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#00262e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6"/></svg></div>
+      <div><h1>Montaje Ponce</h1><p>Conectar con el servidor de la empresa</p></div></div>
+    <label>Dirección del servidor (Supabase URL)<input id="cfg-url" type="url" placeholder="https://xxxx.supabase.co" autocomplete="off" required></label>
+    <label>Clave pública (anon key)<input id="cfg-key" type="text" autocomplete="off" required></label>
+    <button class="big" type="submit">Guardar</button>
+    <p class="small">Te la facilita el responsable de sistemas. Solo hay que ponerla una vez.</p>
+  </form>
+</section>
+
+<!-- Entrar -->
+<section class="screen auth" id="screen-login" hidden>
+  <form id="login-form">
+    <div class="brand"><div class="brand-mark"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#00262e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6"/></svg></div>
+      <div><h1>Montaje Ponce</h1><p>Registro de piezas montadas</p></div></div>
+    <label>Usuario<input id="lg-user" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+    <label>Contraseña<input id="lg-pass" type="password" autocomplete="current-password" required></label>
+    <button class="big" type="submit" id="lg-btn">Entrar</button>
+    <p class="err" id="lg-err" role="alert"></p>
+    <button type="button" class="linkish" id="lg-cfg" hidden>Cambiar servidor</button>
+  </form>
+</section>
+
+<!-- App -->
+<section class="screen" id="screen-app" hidden>
+  <header class="top">
+    <button class="model-btn" id="model-btn" aria-label="Cambiar de obra"><span id="model-name">Elige una obra</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg></button>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span class="sync" id="sync" hidden></span>
+      <button class="icon-btn" id="menu-btn" aria-label="Menú"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
+    <div class="prog"><span class="prog-n" id="prog-n">—</span><div class="bar"><div id="prog-bar"></div></div><span class="prog-p" id="prog-p"></span></div>
+  </header>
+
+  <div class="stage">
+    <div id="viewport"></div>
+    <div class="fab-col">
+      <button class="fab" id="search-btn" aria-label="Buscar pieza"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+      <button class="fab" id="pend-btn" aria-pressed="false" aria-label="Solo pendientes"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      <button class="fab" id="fit-btn" aria-label="Encuadrar todo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+    </div>
+    <div class="overlay" id="loading" hidden><div><div class="spin" aria-hidden="true"></div><p id="loading-t">Cargando…</p></div></div>
+    <div class="overlay" id="empty" hidden><div><p id="empty-t">Todavía no hay obras. El jefe de obra puede subir el IFC desde el menú.</p></div></div>
+  </div>
+
+  <aside class="sheet" id="sheet">
+    <p class="hint" id="card-empty">Toca una pieza en el modelo para marcarla como montada.</p>
+    <div id="card" hidden style="display:flex;flex-direction:column;gap:10px">
+      <div class="mark-row"><h2 id="c-mark"></h2><span class="chip" id="c-chip"></span></div>
+      <p class="meta-line" id="c-type"></p>
+      <p id="c-who"></p>
+      <button id="c-toggle"></button>
+    </div>
+  </aside>
+</section>
+
+<!-- Hojas -->
+<div class="modal" id="m-models" hidden><div class="modal-card"><div class="grab"></div><h2>Obras</h2><ul class="list" id="models-list"></ul></div></div>
+<div class="modal" id="m-search" hidden><div class="modal-card"><div class="grab"></div><h2>Buscar pieza</h2>
+  <input id="q" type="search" placeholder="Marca, nombre o GUID" autocomplete="off"><ul class="list" id="search-list"></ul></div></div>
+<div class="modal" id="m-menu" hidden><div class="modal-card"><div class="grab"></div>
+  <div class="me"><b id="me-name"></b><small id="me-role"></small></div>
+  <ul class="list">
+    <li><button class="row" id="mi-csv"><span class="t"><b>Exportar CSV de montaje</b><small>Marca, estado, quién y cuándo</small></span></button></li>
+    <li><button class="row" id="mi-sync"><span class="t"><b>Sincronizar ahora</b><small id="mi-sync-s">Envía las marcas pendientes</small></span></button></li>
+    <li id="mi-upload-li"><button class="row" id="mi-upload"><span class="t"><b>Subir modelo IFC</b><small>Nueva obra para el equipo</small></span></button></li>
+    <li><button class="row" id="mi-out"><span class="t"><b>Cerrar sesión</b></span></button></li>
+  </ul>
+  <input type="file" id="file" accept=".ifc,application/octet-stream" hidden>
+</div></div>
+<div id="toast" role="status" hidden></div>
+<div id="install" hidden><img src="icon-192.png" alt=""><div class="t"><b>Instala la app</b><span id="ins-t">Añádela a la pantalla de inicio para abrirla como una app y usarla sin cobertura.</span></div>
+  <button id="ins-go" hidden>Instalar</button><button id="ins-x" aria-label="Cerrar">✕</button></div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
