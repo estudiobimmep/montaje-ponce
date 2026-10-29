@@ -117,12 +117,29 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); ou
 #install button { border: 0; padding: 10px 12px; font-weight: 700; }
 #ins-go { background: var(--done); color: var(--done-ink); }
 #ins-x { background: none; color: var(--bar-muted); }
+/* ---- listado de montadas ---- */
+.sheet { overflow: auto; max-height: 48vh; }
+.done-wrap { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--line); padding-top: 10px; }
+.done-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.done-head h3 { margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+#done-csv { border: 0; background: var(--done); color: var(--done-ink); font-weight: 700; padding: 9px 12px; font-size: 14px; }
+#done-csv:disabled { opacity: .4; }
+.done-scroll { overflow-x: auto; }
+#done-table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+#done-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; padding: 6px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+#done-table td { padding: 9px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+#done-table td.mk { font-weight: 700; }
+#done-table td.dt { color: var(--muted); font-size: 13px; }
+#done-table tbody tr { cursor: pointer; }
+#done-table tbody tr td.mk::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 2px; background: #00e5ff; margin-right: 7px; vertical-align: 0; }
+#done-table tbody tr.pend td.mk::before { background: #ffb547; }
+#done-table tbody tr[aria-current=true] { background: var(--bg); }
 #toast[data-kind=err] { background: var(--err); color: #fff; }
 @media (prefers-reduced-motion: reduce) { .spin { animation-duration: 3s; } #prog-bar { transition: none; } }
 @media (min-width: 900px) {
-  #screen-app { display: grid; grid-template-columns: 1fr 360px; grid-template-rows: auto 1fr; }
+  #screen-app { display: grid; grid-template-columns: 1fr 420px; grid-template-rows: auto 1fr; }
   .top { grid-column: 1 / -1; }
-  .sheet { border-top: 0; border-left: 1px solid var(--line); justify-content: flex-start; }
+  .sheet { border-top: 0; border-left: 1px solid var(--line); justify-content: flex-start; max-height: none; }
 }
 </style>
 </head>
@@ -177,13 +194,21 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); ou
   </div>
 
   <aside class="sheet" id="sheet">
-    <p class="hint" id="card-empty">Toca una pieza en el modelo para marcarla como montada.</p>
+    <p class="hint" id="card-empty">Toca una pieza blanca (Armazón estructural) para marcarla como montada.</p>
     <div id="card" hidden style="display:flex;flex-direction:column;gap:10px">
       <div class="mark-row"><h2 id="c-mark"></h2><span class="chip" id="c-chip"></span></div>
       <p class="meta-line" id="c-type"></p>
       <p id="c-who"></p>
       <button id="c-toggle"></button>
     </div>
+    <section class="done-wrap">
+      <div class="done-head"><h3>Montadas <span id="done-n"></span></h3><button id="done-csv" disabled>Descargar Excel</button></div>
+      <p class="hint" id="done-empty">Las piezas que marques como montadas aparecerán aquí.</p>
+      <div class="done-scroll"><table id="done-table" hidden>
+        <thead><tr><th>DPG_Marca_3D</th><th>Orden montaje</th><th>Fecha montada</th></tr></thead>
+        <tbody id="done-body"></tbody>
+      </table></div>
+    </section>
   </aside>
 </section>
 
