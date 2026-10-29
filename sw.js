@@ -1,5 +1,5 @@
 // Guarda la app en el móvil para que abra sin cobertura. Los datos (Supabase) van siempre por red.
-const CACHE = 'montaje-mvt76kak';
+const CACHE = 'montaje-mvt7w0bg';
 const SHELL = ['./', './index.html', './app.js', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-180.png'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
