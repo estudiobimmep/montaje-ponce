@@ -81,15 +81,63 @@ svg.elev .pc .t1 { fill: #d0021b; }
 svg.elev .pc .t2 { fill: #1d2326; font-weight: 600; }
 svg.elev .pc.done polygon { fill: #00e5ff; }
 svg.elev .pc.done .t1 { fill: #00262e; }
+svg.elev .pc.recv polygon { fill: #5fd068; }
+svg.elev .pc.recv .t1 { fill: #0b2a10; }
+svg.elev .pc.inc polygon { fill: #ff3b30; }
+svg.elev .pc.inc .t1 { fill: #ffffff; }
+svg.elev .pc.foto polygon { fill: #d7c4ff; }
+svg.elev .pc.foto .t1 { fill: #2a1160; }
 svg.elev .pc.pend polygon { fill: #ffd27a; }
 svg.elev .pc.faded { opacity: .25; }
 svg.elev .pc.sel polygon { stroke: #ff8a00; stroke-width: 3; }
 .tabs { display: flex; gap: 6px; overflow-x: auto; padding: 8px max(10px, var(--sar)) 8px max(10px, var(--sal)); background: var(--panel); border-bottom: 1px solid var(--line); scrollbar-width: none; }
 .tabs::-webkit-scrollbar { display: none; }
-.tab { flex: none; display: flex; flex-direction: column; align-items: center; gap: 1px; border: 1px solid var(--line); background: var(--bg); padding: 7px 14px; min-height: 44px; font-weight: 700; font-size: 15px; }
+.tab { flex: 1 0 auto; display: flex; flex-direction: column; align-items: center; gap: 1px; border: 1px solid var(--line); background: var(--bg); padding: 6px 8px; min-height: 46px; font-weight: 700; font-size: 14px; }
+.tab::before { content: ""; width: 22px; height: 3px; border-radius: 2px; background: var(--mc, #00e5ff); margin-bottom: 2px; }
+.tab[data-mode=recepcion] { --mc: #5fd068; } .tab[data-mode=incidencias] { --mc: #ff3b30; } .tab[data-mode=imagenes] { --mc: #a57bff; }
 .tab small { font-size: 11px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
 .tab[aria-selected=true] { background: var(--bar); color: var(--bar-fg); border-color: var(--bar); }
-.tab[aria-selected=true] small { color: #00e5ff; }
+.tab[aria-selected=true] small { color: var(--mc, #00e5ff); }
+/* ---- modos ---- */
+#screen-app[data-mode=recepcion] #prog-bar { background: #5fd068; }
+#screen-app[data-mode=incidencias] #prog-bar { background: #ff3b30; }
+#screen-app[data-mode=imagenes] #prog-bar { background: #a57bff; }
+#card[data-mode=recepcion] #c-toggle[data-state=todo] { background: #43c463; color: #06280c; }
+#card[data-mode=recepcion] .chip[data-state=done] { background: #43c463; color: #06280c; }
+.cardx { display: flex; flex-direction: column; gap: 10px; }
+.cm { font-family: var(--f-cond); font-weight: 700; font-size: 30px; line-height: 1; margin: 0; overflow-wrap: anywhere; }
+.chip[data-state=inc] { background: #ff3b30; color: #fff; }
+.chip[data-state=ok] { background: #43c463; color: #06280c; }
+.chip[data-state=foto] { background: #a57bff; color: #fff; }
+.kinds { display: flex; flex-wrap: wrap; gap: 8px; }
+.kinds button { border: 1px solid var(--line); background: var(--bg); padding: 10px 12px; font-size: 15px; font-weight: 600; }
+.kinds button[aria-pressed=true] { background: #ff3b30; border-color: #ff3b30; color: #fff; }
+textarea { font: inherit; font-size: 16px; padding: 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); resize: vertical; min-height: 76px; -webkit-user-select: text; user-select: text; }
+.btn2 { display: flex; gap: 8px; }
+.btn2 > button { flex: 1; }
+.bigc { padding: 16px; font-size: 17px; font-weight: 700; border: 0; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.b-red { background: #ff3b30; color: #fff; }
+.b-pur { background: #a57bff; color: #fff; }
+.b-sec { background: var(--panel); color: var(--fg); border: 1px solid var(--line); font-weight: 600; }
+.b-sec.danger { color: var(--err); }
+.bigc:disabled { opacity: .5; }
+.inc-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.inc-item { border: 1px solid var(--line); border-left: 5px solid #ff3b30; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; background: var(--bg); }
+.inc-item.res { border-left-color: #43c463; opacity: .8; }
+.inc-item b { font-size: 15px; }
+.inc-item p { margin: 0; font-size: 14px; white-space: pre-wrap; overflow-wrap: anywhere; -webkit-user-select: text; user-select: text; }
+.inc-item small { color: var(--muted); font-size: 12px; }
+.inc-item .acts { display: flex; gap: 8px; margin-top: 4px; }
+.inc-item .acts button { border: 1px solid var(--line); background: var(--panel); padding: 8px 10px; font-size: 14px; font-weight: 600; }
+.pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 6px; }
+.pth { position: relative; border: 0; padding: 0; border-radius: 8px; overflow: hidden; aspect-ratio: 1; background: var(--chip); }
+.pth img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pth span { white-space: pre-line; position: absolute; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.62); color: #fff; font-size: 11px; font-weight: 600; padding: 3px 5px; text-align: left; line-height: 1.25; }
+.pth i { position: absolute; top: 4px; right: 4px; width: 10px; height: 10px; border-radius: 50%; background: #ffb547; border: 2px solid #fff; }
+.photo-card { max-height: 94%; }
+#ph-img { width: 100%; max-height: 62vh; object-fit: contain; background: #000; border-radius: 8px; display: block; }
+#ph-cap { margin: 8px 0; font-size: 14px; color: var(--muted); }
+.draft-n { font-size: 14px; color: var(--muted); align-self: center; }
 .fab-col { position: absolute; right: max(12px, var(--sar)); top: 12px; display: flex; flex-direction: column; gap: 10px; }
 .fab { width: 48px; height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); display: grid; place-items: center; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
 .fab[aria-pressed=true] { background: var(--done); border-color: var(--done); color: var(--done-ink); }
@@ -129,7 +177,7 @@ svg.elev .pc.sel polygon { stroke: #ff8a00; stroke-width: 3; }
 .overlay p { margin: 0; color: var(--muted); }
 .spin { width: 32px; height: 32px; border: 3px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: sp .9s linear infinite; }
 @keyframes sp { to { transform: rotate(360deg); } }
-#toast { position: fixed; left: 16px; right: 76px; top: calc(var(--sat) + 112px); margin: auto; width: fit-content; max-width: calc(100% - 92px); background: var(--fg); color: var(--bg); padding: 12px 16px; border-radius: 10px; font-weight: 600; z-index: 50; text-align: center; }
+#toast { position: fixed; left: 16px; right: 76px; top: calc(var(--sat) + 176px); margin: auto; width: fit-content; max-width: calc(100% - 92px); background: var(--fg); color: var(--bg); padding: 12px 16px; border-radius: 10px; font-weight: 600; z-index: 50; text-align: center; }
 #install { position: fixed; left: max(12px, var(--sal)); right: max(12px, var(--sar)); bottom: calc(12px + var(--sab)); z-index: 40; background: var(--bar); color: var(--bar-fg); border-radius: 14px; padding: 14px; display: flex; gap: 12px; align-items: center; box-shadow: 0 6px 24px rgba(0,0,0,.3); }
 #install img { width: 44px; height: 44px; border-radius: 10px; flex: none; }
 #install .t { flex: 1; min-width: 0; font-size: 14px; line-height: 1.35; }
@@ -152,6 +200,9 @@ svg.elev .pc.sel polygon { stroke: #ff8a00; stroke-width: 3; }
 #done-table td.dt { color: var(--muted); font-size: 13px; }
 #done-table tbody tr { cursor: pointer; }
 #done-table tbody tr td.mk::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 2px; background: #00e5ff; margin-right: 7px; vertical-align: 0; }
+#done-table tbody tr[data-k=recv] td.mk::before { background: #5fd068; }
+#done-table tbody tr[data-k=inc] td.mk::before { background: #ff3b30; }
+#done-table tbody tr[data-k=ok] td.mk::before { background: #43c463; }
 #done-table tbody tr.pend td.mk::before { background: #ffb547; }
 #done-table tbody tr[aria-current=true] { background: var(--bg); }
 #toast[data-kind=err] { background: var(--err); color: #fff; }
@@ -205,7 +256,12 @@ svg.elev .pc.sel polygon { stroke: #ff8a00; stroke-width: 3; }
     <div class="prog"><span class="prog-n" id="prog-n">—</span><div class="bar"><div id="prog-bar"></div></div><span class="prog-p" id="prog-p"></span></div>
   </header>
 
-  <nav class="tabs" id="tabs" role="tablist" aria-label="Fachadas" hidden></nav>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Secciones">
+    <button class="tab" role="tab" data-mode="montaje"><span>Montaje</span><small></small></button>
+    <button class="tab" role="tab" data-mode="recepcion"><span>Recepción</span><small></small></button>
+    <button class="tab" role="tab" data-mode="incidencias"><span>Incidencias</span><small></small></button>
+    <button class="tab" role="tab" data-mode="imagenes"><span>Imágenes</span><small></small></button>
+  </nav>
   <div class="stage">
     <div id="viewport"></div>
     <div class="fab-col">
@@ -226,13 +282,33 @@ svg.elev .pc.sel polygon { stroke: #ff8a00; stroke-width: 3; }
       <p id="c-who"></p>
       <button id="c-toggle"></button>
     </div>
+    <div id="card-inc" class="cardx" hidden>
+      <div class="mark-row"><h2 class="cm" id="i-mark"></h2><span class="chip" id="i-chip"></span></div>
+      <p class="meta-line" id="i-type"></p>
+      <ul class="inc-list" id="i-list"></ul>
+      <b style="font-size:14px">Nueva incidencia</b>
+      <div class="kinds" id="i-kinds"></div>
+      <textarea id="i-notes" rows="3" placeholder="Observaciones: qué ha pasado, cómo está la pieza…"></textarea>
+      <div class="btn2"><button class="bigc b-sec" id="i-photo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Añadir foto</button><span class="draft-n" id="i-photo-n"></span></div>
+      <button class="bigc b-red" id="i-save">Registrar incidencia</button>
+    </div>
+    <div id="card-img" class="cardx" hidden>
+      <div class="mark-row"><h2 class="cm" id="g-mark"></h2><span class="chip" id="g-chip"></span></div>
+      <p class="meta-line" id="g-type"></p>
+      <div class="btn2">
+        <button class="bigc b-pur" id="g-cam"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Hacer foto</button>
+        <button class="bigc b-sec" id="g-pick">Galería</button>
+      </div>
+      <div class="pgrid" id="g-grid"></div>
+    </div>
     <section class="done-wrap">
-      <div class="done-head"><h3>Montadas <span id="done-n"></span></h3><button id="done-csv" disabled>Descargar Excel</button></div>
+      <div class="done-head"><h3><span id="done-t">Montadas</span> <span id="done-n"></span></h3><button id="done-csv" disabled>Descargar Excel</button></div>
       <p class="hint" id="done-empty">Las piezas que marques como montadas aparecerán aquí.</p>
       <div class="done-scroll"><table id="done-table" hidden>
-        <thead><tr><th>DPG_Marca_3D</th><th>Orden montaje</th><th>Fecha montada</th></tr></thead>
+        <thead id="done-thead"><tr><th>DPG_Marca_3D</th><th>Orden montaje</th><th>Fecha montada</th></tr></thead>
         <tbody id="done-body"></tbody>
       </table></div>
+      <div class="pgrid" id="photo-grid" hidden></div>
     </section>
   </aside>
 </section>
@@ -244,13 +320,18 @@ svg.elev .pc.sel polygon { stroke: #ff8a00; stroke-width: 3; }
 <div class="modal" id="m-menu" hidden><div class="modal-card"><div class="grab"></div>
   <div class="me"><b id="me-name"></b><small id="me-role"></small></div>
   <ul class="list">
-    <li><button class="row" id="mi-csv"><span class="t"><b>Exportar CSV de montaje</b><small>Marca, estado, quién y cuándo</small></span></button></li>
+    <li><button class="row" id="mi-csv"><span class="t"><b>Descargar Excel</b><small id="mi-csv-s">De la pestaña abierta</small></span></button></li>
     <li><button class="row" id="mi-sync"><span class="t"><b>Sincronizar ahora</b><small id="mi-sync-s">Envía las marcas pendientes</small></span></button></li>
     <li id="mi-upload-li"><button class="row" id="mi-upload"><span class="t"><b>Subir modelo IFC</b><small>Nueva obra para el equipo</small></span></button></li>
     <li><button class="row" id="mi-out"><span class="t"><b>Cerrar sesión</b></span></button></li>
   </ul>
   <input type="file" id="file" accept=".ifc,application/octet-stream" hidden>
 </div></div>
+<div class="modal" id="m-photo" hidden><div class="modal-card photo-card"><div class="grab"></div>
+  <img id="ph-img" alt="Foto"><p id="ph-cap"></p>
+  <div class="btn2"><button class="bigc b-pur" id="ph-dl">Descargar</button><button class="bigc b-sec danger" id="ph-del">Borrar</button></div></div></div>
+<input type="file" id="cam-input" accept="image/*" capture="environment" hidden>
+<input type="file" id="pick-input" accept="image/*" multiple hidden>
 <div id="toast" role="status" hidden></div>
 <div id="install" hidden><img src="icon-192.png" alt=""><div class="t"><b>Instala la app</b><span id="ins-t">Añádela a la pantalla de inicio para abrirla como una app y usarla sin cobertura.</span></div>
   <button id="ins-go" hidden>Instalar</button><button id="ins-x" aria-label="Cerrar">✕</button></div>
