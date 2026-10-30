@@ -70,6 +70,26 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); ou
 .stage { position: relative; flex: 1; min-height: 0; background: var(--stage); }
 #viewport { position: absolute; inset: 0; }
 #viewport canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+/* ---- alzados 2D ---- */
+svg.elev { display: block; touch-action: none; background: #ffffff; cursor: grab; -webkit-user-select: none; user-select: none; }
+svg.elev .ftitle { fill: #1d2326; font-weight: 700; font-family: var(--f-cond); }
+svg.elev .ground { stroke: #9aa5ab; stroke-width: 1; stroke-dasharray: 6 4; vector-effect: non-scaling-stroke; }
+svg.elev .pc polygon { fill: #ffffff; stroke: #1d2326; stroke-width: 1.2; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+svg.elev .pc { cursor: pointer; }
+svg.elev .pc text { text-anchor: middle; font-family: var(--f-cond); font-weight: 700; pointer-events: none; }
+svg.elev .pc .t1 { fill: #d0021b; }
+svg.elev .pc .t2 { fill: #1d2326; font-weight: 600; }
+svg.elev .pc.done polygon { fill: #00e5ff; }
+svg.elev .pc.done .t1 { fill: #00262e; }
+svg.elev .pc.pend polygon { fill: #ffd27a; }
+svg.elev .pc.faded { opacity: .25; }
+svg.elev .pc.sel polygon { stroke: #ff8a00; stroke-width: 3; }
+.tabs { display: flex; gap: 6px; overflow-x: auto; padding: 8px max(10px, var(--sar)) 8px max(10px, var(--sal)); background: var(--panel); border-bottom: 1px solid var(--line); scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { flex: none; display: flex; flex-direction: column; align-items: center; gap: 1px; border: 1px solid var(--line); background: var(--bg); padding: 7px 14px; min-height: 44px; font-weight: 700; font-size: 15px; }
+.tab small { font-size: 11px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tab[aria-selected=true] { background: var(--bar); color: var(--bar-fg); border-color: var(--bar); }
+.tab[aria-selected=true] small { color: #00e5ff; }
 .fab-col { position: absolute; right: max(12px, var(--sar)); top: 12px; display: flex; flex-direction: column; gap: 10px; }
 .fab { width: 48px; height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); display: grid; place-items: center; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
 .fab[aria-pressed=true] { background: var(--done); border-color: var(--done); color: var(--done-ink); }
@@ -118,7 +138,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); ou
 #ins-go { background: var(--done); color: var(--done-ink); }
 #ins-x { background: none; color: var(--bar-muted); }
 /* ---- listado de montadas ---- */
-.sheet { overflow: auto; max-height: 48vh; }
+.sheet { overflow: auto; max-height: 40vh; }
 .done-wrap { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--line); padding-top: 10px; }
 .done-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .done-head h3 { margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
@@ -137,8 +157,11 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); ou
 #toast[data-kind=err] { background: var(--err); color: #fff; }
 @media (prefers-reduced-motion: reduce) { .spin { animation-duration: 3s; } #prog-bar { transition: none; } }
 @media (min-width: 900px) {
-  #screen-app { display: grid; grid-template-columns: 1fr 420px; grid-template-rows: auto 1fr; }
+  #screen-app { display: grid; grid-template-columns: 1fr 420px; grid-template-rows: auto auto 1fr; }
+  .stage { grid-column: 1; grid-row: 3; }
+  .sheet { grid-column: 2; grid-row: 2 / 4; }
   .top { grid-column: 1 / -1; }
+  .tabs { grid-column: 1; grid-row: 2; }
   .sheet { border-top: 0; border-left: 1px solid var(--line); justify-content: flex-start; max-height: none; }
 }
 </style>
@@ -182,11 +205,13 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); ou
     <div class="prog"><span class="prog-n" id="prog-n">—</span><div class="bar"><div id="prog-bar"></div></div><span class="prog-p" id="prog-p"></span></div>
   </header>
 
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Fachadas" hidden></nav>
   <div class="stage">
     <div id="viewport"></div>
     <div class="fab-col">
       <button class="fab" id="search-btn" aria-label="Buscar pieza"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
       <button class="fab" id="pend-btn" aria-pressed="false" aria-label="Solo pendientes"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      <button class="fab" id="mirror-btn" aria-label="Invertir alzado" hidden><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg></button>
       <button class="fab" id="fit-btn" aria-label="Encuadrar todo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
     </div>
     <div class="overlay" id="loading" hidden><div><div class="spin" aria-hidden="true"></div><p id="loading-t">Cargando…</p></div></div>
@@ -194,7 +219,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); ou
   </div>
 
   <aside class="sheet" id="sheet">
-    <p class="hint" id="card-empty">Toca una pieza blanca (Armazón estructural) para marcarla como montada.</p>
+    <p class="hint" id="card-empty">Toca una pieza de Armazón estructural para marcarla como montada.</p>
     <div id="card" hidden style="display:flex;flex-direction:column;gap:10px">
       <div class="mark-row"><h2 id="c-mark"></h2><span class="chip" id="c-chip"></span></div>
       <p class="meta-line" id="c-type"></p>
